@@ -18,6 +18,8 @@
     (values "" 'no-color #f (position-offset start-pos) (position-offset end-pos))]
    [(special-comment)
     (values "" 'comment #f (position-offset start-pos) (position-offset end-pos))]
+   [(char-complement (union))
+    (values lexeme 'error #f (position-offset start-pos) (position-offset end-pos))]
    [(eof)
     (values lexeme 'eof #f #f #f)]))
 
@@ -56,4 +58,12 @@
                   (")" parens)
                   ("." parens)))
   (check-equal? (lex "% a(X,Y) :- b(Y,X).\n")
-                '(("% a(X,Y) :- b(Y,X).\n" comment))))
+                '(("% a(X,Y) :- b(Y,X).\n" comment)))
+  (check-equal? (lex "f(X) ::-")
+                '(("f" symbol)
+                  ("(" parens)
+                  ("X" symbol)
+                  (")" parens)
+                  (" " white-space)
+                  (":" error)
+                  (":-" parens))))

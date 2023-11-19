@@ -24,7 +24,15 @@ mini-prolog
    ["." (token-period (to-stx start-pos end-pos '|.|))]
    [(:: "%" (:* (:~ #\newline)) "\n") (position-token-token (mp-lexer input-port))]
    [(eof) (token-eof (to-stx start-pos end-pos eof))]
-   [whitespace (position-token-token (mp-lexer input-port))]))
+   [whitespace (position-token-token (mp-lexer input-port))]
+   [(char-complement (union))
+    (raise-read-error (format "could not tokenize at character `~a`" lexeme)
+                      (source)
+                      (position-line start-pos)
+                      (position-col start-pos)
+                      (position-offset start-pos)
+                      (- (position-offset end-pos)
+                         (position-offset start-pos)))]))
 
 (define (to-stx start-pos end-pos val)
   (datum->syntax
