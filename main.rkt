@@ -2,7 +2,9 @@
 (module reader racket (require "reader.rkt") (provide (all-from-out "reader.rkt")))
 (require (for-syntax syntax/parse))
 
-(provide %- (rename-out [mini-prolog-module-begin #%module-begin]))
+(provide %-
+         (rename-out [mini-prolog-module-begin #%module-begin]
+                     [mini-prolog-top-interaction #%top-interaction]))
 (define-syntax (%- stx)
   (raise-syntax-error '%- "must be used inside prolog" stx))
 
@@ -26,6 +28,11 @@
   (syntax-parse stx
     [(_ d:decl ...)
      #'(#%plain-module-begin (+ 1 2))]))
+
+(define-syntax (mini-prolog-top-interaction stx)
+  (syntax-parse stx
+    [(_ . stuff)
+     #'(printf "query ~s\n" 'stuff)]))
 
 (module+ main
   (mini-prolog-module-begin
