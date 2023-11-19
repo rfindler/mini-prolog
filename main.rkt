@@ -1,7 +1,8 @@
 #lang racket
+(module reader racket (require "reader.rkt") (provide (all-from-out "reader.rkt")))
 (require (for-syntax syntax/parse))
 
-(provide %-)
+(provide %- (rename-out [mini-prolog-module-begin #%module-begin]))
 (define-syntax (%- stx)
   (raise-syntax-error '%- "must be used inside prolog" stx))
 
@@ -21,19 +22,20 @@
       #:when (regexp-match? #rx"^[a-z]" (symbol->string (syntax-e #'x)))))
   )
 
-(define-syntax (prolog stx)
+(define-syntax (mini-prolog-module-begin stx)
   (syntax-parse stx
     [(_ d:decl ...)
-     #'(void)]))
+     #'(#%plain-module-begin (+ 1 2))]))
 
-(prolog
- (%- (train koper ljubljana))
- (%- (bus koper ljubljana))
- (%- (bus ljubljana maribor))
- (%- (bus ljubljana kocevje))
- (%- (train kranj bled))
- (%- (bus bled bohinj))
- (%- (connection1 X Y) (train X Y))
- (%- (connection1 X Y) (bus X Y))
- (%- (connection X Y) (connection1 X Y))
- (%- (connection X Y) (connection1 X Z) (connection Z Y)))
+(module+ main
+  (mini-prolog-module-begin
+   (%- (train koper ljubljana))
+   (%- (bus koper ljubljana))
+   (%- (bus ljubljana maribor))
+   (%- (bus ljubljana kocevje))
+   (%- (train kranj bled))
+   (%- (bus bled bohinj))
+   (%- (connection1 X Y) (train X Y))
+   (%- (connection1 X Y) (bus X Y))
+   (%- (connection X Y) (connection1 X Y))
+   (%- (connection X Y) (connection1 X Z) (connection Z Y))))
