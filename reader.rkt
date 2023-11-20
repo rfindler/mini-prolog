@@ -16,7 +16,7 @@ mini-prolog
 (define source (make-parameter #f))
 (define mp-lexer
   (lexer-src-pos
-   [(:: alphabetic (:* (:or alphabetic numeric #\_))) (token-id (to-stx start-pos end-pos (string->symbol lexeme)))]
+   [(:: alphabetic (:* (:or alphabetic numeric #\_))) (token-id (to-stx start-pos end-pos (string->symbol lexeme) #t))]
    ["(" (token-open (to-stx start-pos end-pos "("))]
    [")" (token-close (to-stx start-pos end-pos ")"))]
    ["," (token-comma (to-stx start-pos end-pos '|,|))]
@@ -34,9 +34,11 @@ mini-prolog
                       (- (position-offset end-pos)
                          (position-offset start-pos)))]))
 
-(define (to-stx start-pos end-pos val)
+(define (to-stx start-pos end-pos val [original? #f])
+  (define props (and original?
+                     (read-syntax (source) (open-input-string (symbol->string val)))))
   (datum->syntax
-   #f
+   props
    val
    (srcloc
     (source)
@@ -44,7 +46,8 @@ mini-prolog
     (position-col start-pos)
     (position-offset start-pos)
     (- (position-offset end-pos)
-       (position-offset start-pos)))))
+       (position-offset start-pos)))
+   props))
 
 (module+ test (void))
 (module+ test
